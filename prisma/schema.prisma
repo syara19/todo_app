@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(uuid()) @map("id")
+  username  String     @unique
+  roleId    String     @map("role_id")
+  todolists TodoList[]
+  role      Role       @relation(fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model Role {
+  id    String @id @default(uuid()) @map("id")
+  name  String @unique
+  users User[]
+
+  @@map("roles")
+}
+
+model TodoList {
+  id          String    @id @default(uuid()) @map("id")
+  title       String
+  description String?
+  labelId     String    @map("label_id")
+  priority    Priority  @default(LOW)
+  dueDate     DateTime? @map("due_date")
+  userId      String    @map("user_id")
+  label       Label     @relation(fields: [labelId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@map("todolists")
+}
+
+model Label {
+  id        String     @id @default(uuid()) @map("id")
+  title     String     @unique
+  todolists TodoList[]
+
+  @@map("labels")
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
