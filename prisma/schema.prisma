@@ -10,7 +10,8 @@ datasource db {
 
 model User {
   id        String     @id @default(uuid()) @map("id")
-  username  String     @unique
+  username  String     @unique 
+  password  String      
   roleId    String     @map("role_id")
   todolists TodoList[]
   role      Role       @relation(fields: [roleId], references: [id])
@@ -28,13 +29,14 @@ model Role {
 
 model TodoList {
   id          String    @id @default(uuid()) @map("id")
-  title       String
+  title       String    
   description String?
-  labelId     String    @map("label_id")
+  labelId     String?    @map("label_id")
   priority    Priority  @default(LOW)
+  isDone      Boolean      @default(false)
   dueDate     DateTime? @map("due_date")
   userId      String    @map("user_id")
-  label       Label     @relation(fields: [labelId], references: [id])
+  label       Label?     @relation(fields: [labelId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
 
   @@map("todolists")
@@ -42,7 +44,7 @@ model TodoList {
 
 model Label {
   id        String     @id @default(uuid()) @map("id")
-  title     String     @unique
+  title     String     @unique 
   todolists TodoList[]
 
   @@map("labels")

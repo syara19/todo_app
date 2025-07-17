@@ -1,6 +1,8 @@
-import { prisma } from "@/app/lib/prisma/prismaClient";
-
+import { prisma } from "@/lib/prismaClient";
+import bcrypt from 'bcrypt';
 async function main() {
+  const password =  await bcrypt.hash('password', 10);
+
     const adminRole = await prisma.role.upsert({
       where: { name: 'ADMIN' },
       update: {},
@@ -24,6 +26,7 @@ async function main() {
       update: {},
       create: {
         username: 'alice',
+        password,
         roleId: adminRole.id,
       },
     });
@@ -33,6 +36,7 @@ async function main() {
       update: {},
       create: {
         username: 'bob',
+        password,
         roleId: userRole.id,
       },
     });
@@ -105,6 +109,7 @@ async function main() {
         title: 'Call Mom',
         description: 'Check in with Mom and plan weekend visit.',
         priority: 'LOW',
+        isDone: true,
         dueDate: new Date('2025-07-19T12:00:00Z'),
         labelId: personalLabel.id,
         userId: bob.id,
