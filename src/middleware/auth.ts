@@ -1,43 +1,34 @@
-import { verifyJwt } from "@/lib/tokenManager";
-import { JWTPayload } from "jose";
+import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function authenticateRoute(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  const token = authHeader?.split(" ")[1];
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
   if (!token) {
     return {
       authenticated: false,
-      response: NextResponse.json(
-        { message: "No token provided" },
-        { status: 401 }
-      ),
+      response: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
     };
   }
 
   try {
-    const payload = await verifyJwt(token);
-
-    if (!payload) {
-      return {
-        authenticated: false,
-        response: NextResponse.json(
-          { message: "Invalid or expired token" },
-          { status: 403 }
-        ),
-      };
-    }
-
-    return { authenticated: true, user: payload as JWTPayload };
-  } catch (error) {
-    console.error("Authentication Error:", error);
+    const user = {
+      userId: token.id as string,
+      username: token.username as string,
+      role: token.role as string,
+    };
+    return {
+      authenticated: true,
+      user,
+    };
+  } catch (e) {
+    console.error("Token verification failed", e);
     return {
       authenticated: false,
-      response: NextResponse.json(
-        { message: "Failed to authenticate token" },
-        { status: 500 }
-      ),
+      response: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
     };
   }
 }

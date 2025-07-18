@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prismaClient";
 import { error } from "console";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { signJwt } from "@/lib/tokenManager";
+import { signJwt } from "@/lib/jwt";
 
 export async function POST(request: Request) {
   try {

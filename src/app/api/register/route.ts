@@ -1,8 +1,6 @@
+import { hashPassword } from "@/lib/bcrypt";
 import { prisma } from "@/lib/prismaClient";
-import bcrypt from "bcrypt";
 import { NextResponse } from "next/server";
-
-
 
 export async function POST(request: Request) {
   try {
@@ -40,27 +38,23 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-
-    const passwordHashed = await bcrypt.hash(password, 10);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
         username,
-        password: passwordHashed,
+        password: hashedPassword,
         roleId,
       },
     });
 
-    return NextResponse.json({ message: "User created successfully" });
+    return NextResponse.json(
+      { message: "User created successfully" },
+      { status: 201 }
+    );
   } catch (e) {
-    console.log(e);
+    console.error(e);
 
-    if (e.code === "P2002" && e.meta?.target?.includes("username")) {
-      return NextResponse.json(
-        { message: "Username already exists" },
-        { status: 409 }
-      );
-    }
     if (e instanceof SyntaxError && e.message.includes("JSON")) {
       return NextResponse.json(
         { message: "Invalid JSON body" },

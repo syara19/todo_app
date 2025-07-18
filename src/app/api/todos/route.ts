@@ -12,6 +12,9 @@ export async function GET(request: NextRequest) {
     where: {
       userId: authResult.user!.userId as string,
     },
+    include: {
+      label: true,
+    },
   });
   return NextResponse.json(todos);
 }
@@ -29,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     if (!title) {
       return NextResponse.json(
-        { message: "Title and labelId are required" },
+        { message: "Title is required" },
         { status: 400 }
       );
     }

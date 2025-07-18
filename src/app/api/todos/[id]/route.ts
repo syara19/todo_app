@@ -113,7 +113,7 @@ export async function DELETE(
       return authResult.response; 
     }
 
-    const { id } = await params;
+    const { id } = params;
     const userId = authResult.user?.userId; 
 
     console.log("Deleting todo with ID:", id, "for User ID:", userId);
