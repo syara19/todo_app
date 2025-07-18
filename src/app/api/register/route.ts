@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, password, roleId } = body;
+    const { username, password, roleId } = body; 
 
     if (!username || typeof username !== "string" || username.trim() === "") {
       return NextResponse.json(
@@ -24,7 +24,18 @@ export async function POST(request: Request) {
     }
     if (!roleId || typeof roleId !== "string" || roleId.trim() === "") {
       return NextResponse.json(
-        { message: "Role ID is required and must be a non-empty string" },
+        { message: "Role must be selected" }, 
+        { status: 400 }
+      );
+    }
+
+    const existingRole = await prisma.role.findUnique({
+      where: { id: roleId },
+    });
+
+    if (!existingRole) {
+      return NextResponse.json(
+        { message: "Invalid role selected" },
         { status: 400 }
       );
     }
@@ -38,13 +49,13 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const hashedPassword = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
         username,
         password: hashedPassword,
-        roleId,
+        roleId, 
       },
     });
 
@@ -52,12 +63,12 @@ export async function POST(request: Request) {
       { message: "User created successfully" },
       { status: 201 }
     );
-  } catch (e) {
-    console.error(e);
+  } catch (e: any) {
+    console.error("Registration error:", e);
 
     if (e instanceof SyntaxError && e.message.includes("JSON")) {
       return NextResponse.json(
-        { message: "Invalid JSON body" },
+        { message: "Invalid request body format (JSON expected)" },
         { status: 400 }
       );
     }

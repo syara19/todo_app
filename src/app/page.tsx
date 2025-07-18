@@ -77,7 +77,7 @@ export default function Home() {
       });
       mutate();
     } catch (err) {
-      mutate(todos, false); // Revert to previous state
+      mutate(todos, false);
       console.error("Failed to delete todo:", err);
     }
 
@@ -97,18 +97,18 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="container mx-auto px-4 py-8"> {/* Added main, container, mx-auto, px-4, py-8 */}
-        <h1 className='text-3xl font-bold mb-6 text-center'>Todo List</h1> {/* Added text-center */}
-        <div className="max-w-xl mx-auto"> {/* Added a wrapper for form for better centering */}
+      <main className="container mx-auto px-4 py-8">
+        <h1 className='text-3xl font-bold mb-6 text-center'>Todo List</h1>
+        <div className="max-w-xl mx-auto">
           <TodoForm onTodoAdded={handleTodoAdded} />
         </div>
 
         <div className='mt-6'>
-          {todos.length === 0 ? (
+          {todos?.length === 0 ? (
             <p className="text-center text-gray-500">No todos yet. Add one!</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 justify-items-center ">
-              {todos.map((todo: Todo) => (
+              {todos?.map((todo: Todo) => (
                 <Card
                   key={todo.id}
                   todo={todo}

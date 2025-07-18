@@ -38,7 +38,7 @@ export default function Card({
         const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(`Failed to delete todo: ${errorData.message}`);
       }
-      onTodoDeleted(todo.id); // Call parent handler to update SWR cache
+      onTodoDeleted(todo.id);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -62,7 +62,7 @@ export default function Card({
         const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(`Failed to update todo status: ${errorData.message}`);
       }
-      onTodoUpdated(); // Re-fetch all todos to update the list
+      onTodoUpdated(); 
     } catch (err: any) {
       setError(err.message);
     } finally {

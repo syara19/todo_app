@@ -5,8 +5,8 @@ import { useSession } from "next-auth/react";
 
 interface TodoFormProps {
   onTodoAdded: (todo: any) => void;
-  initialData?: any; // For editing
-  onTodoUpdated?: (todo: any) => void; // For editing
+  initialData?: any; 
+  onTodoUpdated?: (todo: any) => void; 
 }
 
 export default function TodoForm({

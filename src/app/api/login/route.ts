@@ -40,7 +40,6 @@ export async function POST(request: Request) {
     }
 
     const token = await signJwt({ userId: user?.id });
-    // console.log(token);
 
     return NextResponse.json(
       { message: "login success", token },

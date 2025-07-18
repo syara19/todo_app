@@ -63,7 +63,7 @@ export default function TodoDetailPage({ params }: { params: { id: string } }) {
   };
 
   const handleTodoUpdated = () => {
-    fetchTodo(); // Re-fetch the single todo to show updated data
+    fetchTodo(); 
   };
 
   if (status === "loading" || loading) {

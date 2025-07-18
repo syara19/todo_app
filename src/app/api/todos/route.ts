@@ -15,7 +15,11 @@ export async function GET(request: NextRequest) {
     include: {
       label: true,
     },
+    orderBy:{
+      isDone: 'asc',
+    }
   });
+  console.log(todos);
   return NextResponse.json(todos);
 }
 

@@ -11,18 +11,17 @@ export default function Login() {
   const router = useRouter()
   const { status } = useSession()
 
-  // Redirect if already authenticated
   if (status === 'authenticated') {
     router.push('/')
-    return null // Don't render anything while redirecting
+    return null 
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null) // Clear previous errors
+    setError(null)
 
     const result = await signIn('credentials', {
-      redirect: false, // Prevent NextAuth from redirecting automatically
+      redirect: false, 
       username,
       password,
     })
@@ -30,7 +29,7 @@ export default function Login() {
     if (result?.error) {
       setError(result.error)
     } else {
-      router.push('/') // Redirect to home page on successful login
+      router.push('/') 
     }
   }
   return(
