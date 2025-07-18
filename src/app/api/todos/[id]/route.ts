@@ -13,7 +13,7 @@ export async function GET(
       return authResult.response; 
     }
 
-    const { id } = params;
+    const { id } = await params;
     const userId = authResult.user?.userId as string; 
 
     const todo = await prisma.todoList.findUnique({
@@ -58,7 +58,7 @@ export async function PUT(
       return authResult.response; 
     }
 
-    const { id } = params;
+    const { id } = await params;
     const userId = authResult.user?.userId;
 
     const { title, description, labelId, priority, isDone, dueDate } =
@@ -113,7 +113,7 @@ export async function DELETE(
       return authResult.response; 
     }
 
-    const { id } = params;
+    const { id } = await params;
     const userId = authResult.user?.userId; 
 
     console.log("Deleting todo with ID:", id, "for User ID:", userId);
