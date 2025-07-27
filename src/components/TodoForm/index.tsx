@@ -3,10 +3,18 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 
+interface Todo {
+  id: string;
+  title: string;
+  description?: string;
+  priority: string;
+  dueDate?: string;
+}
+
 interface TodoFormProps {
-  onTodoAdded: (todo: any) => void;
-  initialData?: any; 
-  onTodoUpdated?: (todo: any) => void; 
+  onTodoAdded: (todo: Todo) => void;
+  initialData?: Todo;
+  onTodoUpdated?: (todo: Todo) => void;
 }
 
 export default function TodoForm({
@@ -45,7 +53,7 @@ export default function TodoForm({
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user.username}`, // Example for token
+          Authorization: `Bearer ${session?.user?.name}`,
         },
         body: JSON.stringify({
           title,
@@ -62,7 +70,9 @@ export default function TodoForm({
 
       const data = await res.json();
       if (initialData) {
-        onTodoUpdated && onTodoUpdated(data);
+        if (onTodoUpdated) {
+          onTodoUpdated(data);
+        }
       } else {
         onTodoAdded(data);
         setTitle("");
@@ -70,8 +80,10 @@ export default function TodoForm({
         setPriority("LOW");
         setDueDate("");
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }

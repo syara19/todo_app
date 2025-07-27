@@ -31,7 +31,7 @@ export default function Card({
       const res = await fetch(`/api/todos/${todo.id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${session?.user.username}`,
+          Authorization: `Bearer ${session?.user?.name}`,
         },
       });
       if (!res.ok) {
@@ -39,8 +39,10 @@ export default function Card({
         throw new Error(`Failed to delete todo: ${errorData.message}`);
       }
       onTodoDeleted(todo.id);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -54,7 +56,7 @@ export default function Card({
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.user.username}`,
+          Authorization: `Bearer ${session?.user?.name}`,
         },
         body: JSON.stringify({ isDone: !todo.isDone }),
       });
@@ -62,9 +64,11 @@ export default function Card({
         const errorData = await res.json().catch(() => ({ message: 'Unknown error' }));
         throw new Error(`Failed to update todo status: ${errorData.message}`);
       }
-      onTodoUpdated(); 
-    } catch (err: any) {
-      setError(err.message);
+      onTodoUpdated();
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setIsUpdatingStatus(false);
     }

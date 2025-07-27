@@ -1,58 +1,64 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "./prismaClient";
-import { compare } from "bcrypt";
 
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.username || !credentials.password) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
-          include: { role: true },
+        const res = await fetch("http://localhost:3000/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
         });
 
-        if (!user || !(await compare(credentials.password, user.password))) {
+        console.log('Raw response from API:', res);
+  if (!res.ok) {
+    const errorText = await res.text(); 
+    console.error('API Error Response Text:', errorText);
+   
+    return null;
+  }
+
+        if (res.ok) {
+          const user = await res.json();
+          return user;
+        } else {
+          const errorData = await res.json();
+          console.error(errorData.message);
           return null;
         }
-        return {
-          userId: user.id,
-          username: user.username,
-          role: user.role.name,
-        };
       },
     }),
   ],
   session: {
     strategy: "jwt",
   },
-  pages: {
-    signIn: "/login",
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.userId as string;
-        token.username = user.username as string;
+        token.email = user.email;
+        token.name = user.name;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string;
+        session.user = session.user ?? {};
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
       }
       return session;
     },
+  },
+  pages: {
+    signIn: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

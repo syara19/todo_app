@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState} from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useSWR from "swr";
@@ -21,10 +21,13 @@ const fetcher = async (url: string) => {
 };
 
 export default function RegisterPage() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [selectedRoleId, setSelectedRoleId] = useState<string>("");
+    const [form, setForm] = useState({
+        username: "",
+        email: "",
+        password: "",
+        roleId: "",
+    });
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -32,25 +35,24 @@ export default function RegisterPage() {
 
     const { data: roles, error: rolesError, isLoading: rolesLoading } = useSWR<Role[]>("/api/roles", fetcher);
 
-    useEffect(() => {
-        if (roles && roles.length > 0 && !selectedRoleId) {
-            setSelectedRoleId(roles[0].id);
-        }
-    }, [roles, selectedRoleId]);
-
+    // useEffect(() => {
+    //     if (roles && roles.length > 0 ) {
+    //     }
+    // }, [roles]);
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
         setSuccessMessage(null);
 
-        if (password !== confirmPassword) {
+        if (form.password !== confirmPassword) {
             setError("Passwords do not match.");
             setLoading(false);
             return;
         }
 
-        if (!selectedRoleId) {
+        if (!form.roleId) {
             setError("Please select a role.");
             setLoading(false);
             return;
@@ -62,7 +64,7 @@ export default function RegisterPage() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ username, password, roleId: selectedRoleId }),
+                body: JSON.stringify(form),
             });
 
             if (!res.ok) {
@@ -71,22 +73,28 @@ export default function RegisterPage() {
             }
 
             setSuccessMessage("Registration successful! You can now log in.");
-            setUsername("");
-            setPassword("");
+            setForm({
+                username: "",
+                email: "",
+                password: "",
+                roleId: "",
+            })
             setConfirmPassword("");
-            setSelectedRoleId(roles && roles.length > 0 ? roles[0].id : "");
+            // setSelectedRoleId(roles && roles.length > 0 ? roles[0].id : "");
             setTimeout(() => {
                 router.push("/login");
             }, 2000);
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message);
+            }
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex justify-center items-center min-h-[calc(100vh-64px)] bg-gray-100">
+        <div className="flex justify-center items-center min-h-screen bg-gray-100">
             <div className="card w-96 bg-white shadow-xl rounded-lg p-6">
                 <div className="card-body p-0">
                     <h2 className="card-title text-2xl font-bold text-center mb-6">Register</h2>
@@ -107,14 +115,27 @@ export default function RegisterPage() {
                     <form onSubmit={handleSubmit}>
                         <div className="form-control mb-4">
                             <label className="label">
+                                <span className="label-text">Email</span>
+                            </label>
+                            <input
+                                type="email"
+                                placeholder="Enter your email"
+                                className="input input-bordered w-full rounded-md"
+                                value={form.email}
+                                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div className="form-control mb-4">
+                            <label className="label">
                                 <span className="label-text">Username</span>
                             </label>
                             <input
                                 type="text"
                                 placeholder="Enter your username"
                                 className="input input-bordered w-full rounded-md"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                value={form.username}
+                                onChange={(e) => setForm({ ...form, username: e.target.value })}
                                 required
                             />
                         </div>
@@ -126,8 +147,8 @@ export default function RegisterPage() {
                                 type="password"
                                 placeholder="Enter your password"
                                 className="input input-bordered w-full rounded-md"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                value={form.password}
+                                onChange={(e) => setForm({ ...form, password: e.target.value })}
                                 required
                             />
                         </div>
@@ -155,11 +176,11 @@ export default function RegisterPage() {
                             ) : (
                                 <select
                                     className="select select-bordered w-full rounded-md"
-                                    value={selectedRoleId}
-                                    onChange={(e) => setSelectedRoleId(e.target.value)}
+                                    value={form.roleId}
+                                    onChange={(e) => setForm({ ...form, roleId: e.target.value })}
                                     required
                                 >
-                                    {!selectedRoleId && <option value="" disabled>Select a role</option>}
+                                    {!form.roleId && <option value="" disabled>Select a role</option>}
                                     {roles?.map((role) => (
                                         <option key={role.id} value={role.id}>
                                             {role.name}
@@ -172,7 +193,7 @@ export default function RegisterPage() {
                             <button
                                 type="submit"
                                 className="btn btn-primary w-full rounded-md"
-                                disabled={loading || rolesLoading || !selectedRoleId}
+                                disabled={loading || rolesLoading || form.roleId === ""}
                             >
                                 {loading ? <span className="loading loading-spinner"></span> : "Register"}
                             </button>

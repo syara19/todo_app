@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, password, roleId } = body; 
+    const { username, email,  password, roleId } = body; 
 
     if (!username || typeof username !== "string" || username.trim() === "") {
       return NextResponse.json(
@@ -51,9 +51,10 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         username,
+        email,
         password: hashedPassword,
         roleId, 
       },
@@ -63,7 +64,10 @@ export async function POST(request: Request) {
       { message: "User created successfully" },
       { status: 201 }
     );
-  } catch (e: any) {
+  } catch (e) {
+    if(e instanceof Error) {
+      console.error(e.message);
+    }
     console.error("Registration error:", e);
 
     if (e instanceof SyntaxError && e.message.includes("JSON")) {
@@ -74,7 +78,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { message: "Error creating user", details: e.message || "Unknown error" },
+      { message: "Error creating user", details: (e as Error).message || "Unknown error" },
       { status: 500 }
     );
   }

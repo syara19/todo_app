@@ -4,7 +4,7 @@ import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 
 export default function Navbar() {
-  const { data: session, status } = useSession();
+  const {  status } = useSession();
 
   return (
     <nav className="navbar bg-base-100">
